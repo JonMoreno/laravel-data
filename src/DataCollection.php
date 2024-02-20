@@ -56,16 +56,20 @@ class DataCollection implements Responsable, BaseDataCollectableContract, Transf
         public readonly string $dataClass,
         Enumerable|array|DataCollection|null $items
     ) {
+        $fromMethod = "from";
+        if (is_array($items) && str_contains($items[0] ?? "", "from")) {
+            $fromMethod = trim($items[0]);
+            $items = $items[1];
+        }
+            
         if (is_array($items) || is_null($items)) {
             $items = new Collection($items);
         }
-
         if ($items instanceof DataCollection) {
             $items = $items->toCollection();
         }
-
         $this->items = $items->map(
-            fn ($item) => $item instanceof $this->dataClass ? $item : $this->dataClass::from($item)
+            fn ($item) => $item instanceof $this->dataClass ? $item : $this->dataClass::$fromMethod($item)
         );
     }
 
